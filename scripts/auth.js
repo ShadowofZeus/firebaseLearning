@@ -1,3 +1,23 @@
+ 
+
+ //listen for Auth status changes
+ auth.onAuthStateChanged((user) => {
+    //  console.log(user)
+    if(user)
+    {
+        //Getting the Data
+        db.collection('guides').get()
+        .then(snapshot => {
+            setupGuides(snapshot.docs);
+        });
+    }
+    else
+    {
+        setupGuides([]);
+    }
+ });
+ 
+ //signing UP
  const signupForm = document.querySelector('#signup-form');
 
  signupForm.addEventListener('submit',(e) => {
@@ -14,9 +34,9 @@
     //its an ASYNC function
     auth.createUserWithEmailAndPassword(email,password)
         .then((cred) => {
-            console.log(cred);
+            // console.log(cred);
         //clearing out form and modal
-        signupForm.requestFullscreen();
+        signupForm.reset();
         const modal = document.querySelector('#modal-signup');
         M.Modal.getInstance(modal).close();
         })
@@ -28,7 +48,44 @@
      e.preventDefault();
      //Async method
      auth.signOut()
-        .then(() => {
-            console.log('User has signed out from App')
-        });
+        // .then(() => {
+        //     // console.log('User has signed out from App')
+        // });
  });
+
+//login section
+const loginForm = document.querySelector('#login-form');
+loginForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+
+    //get user info
+    const email = loginForm['login-email'].value;
+    const password = loginForm['login-password'].value;
+
+    //firebase Auth
+    auth.signInWithEmailAndPassword(email,password)
+        .then((cred) => {
+            loginForm.reset();
+            const modal = document.querySelector('#modal-login');
+            M.Modal.getInstance(modal).close();
+        });
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
