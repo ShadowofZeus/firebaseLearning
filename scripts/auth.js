@@ -6,15 +6,36 @@
     if(user)
     {
         //Getting the Data
-        db.collection('guides').get()
-        .then(snapshot => {
+        db.collection('guides')
+        .onSnapshot(snapshot => {
             setupGuides(snapshot.docs);
+            setupUI(user);
+        }, err => {
+            console.log(err.message)
         });
     }
     else
     {
         setupGuides([]);
+        setupUI(user);
     }
+ });
+
+ //Creating a New guide
+ const createForm = document.querySelector('#create-form');
+ createForm.addEventListener('submit',(e) => {
+     e.preventDefault();
+     db.collection('guides').add({
+         title: createForm['title'].value,
+         content: createForm['content'].value
+     }).then(() =>{
+         //close the modal and reset the form
+        createForm.reset();
+        const modal = document.querySelector('#modal-create');
+        M.Modal.getInstance(modal).close();
+     }).catch((err) => {
+         console.log(err);
+     })
  });
  
  //signing UP
@@ -35,11 +56,16 @@
     auth.createUserWithEmailAndPassword(email,password)
         .then((cred) => {
             // console.log(cred);
-        //clearing out form and modal
-        signupForm.reset();
-        const modal = document.querySelector('#modal-signup');
-        M.Modal.getInstance(modal).close();
-        })
+        return db.collection('users').doc(cred.user.uid).set({
+            bio: signupForm['signup-bio'].value
+        });
+        
+        }).then(() => {
+            //clearing out form and modal
+            signupForm.reset();
+            const modal = document.querySelector('#modal-signup');
+            M.Modal.getInstance(modal).close();
+        });
  });
 
  //logging out from the App
